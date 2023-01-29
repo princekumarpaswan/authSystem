@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
     res.send("hello auth System")
 })
 
-app.post("/registrer", async (req, res) => {
+app.post("/register", async (req, res) => {
     try {
         // ollect all information
         const { firstName, lastName, email, password } = req.body
@@ -103,3 +103,5 @@ app.post("/login", async (req, res) => {
 app.get("/dashboard", (req, auth, res) => {
     res.send("Welcome to dashboard")
 })
+
+module.exports = app

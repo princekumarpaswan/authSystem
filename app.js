@@ -65,43 +65,57 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
     try {
-        // collect information from frontend
+        //collected information from frontend
         const { email, password } = req.body
-        // validate
+        //validate
         if (!(email && password)) {
-            res.status(401).send("email and password required")
+            res.status(401).send("email and password is required")
         }
 
-        // check user i database
+        //check user in database
         const user = await User.findOne({ email })
-        // match the passwords
+        //if user does not exists - assignment
+        //match the password
         if (user && (await bcrypt.compare(password, user.password))) {
-            const token = jwt.sign({ id: user._id, email }, "77777", { expiresIn: '2h' })
+            const token = jwt.sign({ id: user._id, email }, '77777', { expiresIn: '2h' })
+
+
+            user.password = undefined
+            user.token = token
+
+            const options = {
+                expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+                httpOnly: true
+            }
+            res.status(200).cookie("token", token, options).json({
+                success: true,
+                token,
+                user
+            })
+
         }
-        user.password = undefined
-        user.token = token
-
-
-        const options = {
-            expire: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-            httpOnly: true,
-        }
-        res.status(200).cookie("token", token, options).json({
-            success: true,
-            token,
-            user
-        })
-
-
-        // create token and send
+        //create token and send
         res.sendStatus(400).send("email or password is incorrect")
     } catch (error) {
-
+        console.log(error);
     }
+
+
 })
 
-app.get("/dashboard", (req, auth, res) => {
+app.get("/dashboard", auth, (req, res) => {
     res.send("Welcome to dashboard")
 })
+
+app.get("/profile", (req, auth, getRole, res) => {
+    // acess to req.user = id, email
+
+    // based on id, query to DB and get all information of user - findOne({id})
+
+    // send a json response with all data
+})
+
+
+
 
 module.exports = app
